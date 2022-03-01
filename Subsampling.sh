@@ -37,6 +37,6 @@ rm $SNIC_TMP/SRR10957229_2.fastq
 # Gzipping subsamples
 echo -e "\n`date` Gzipping subsamples"
 gzip SRR10957229_1_sub.fastq
-gzip SRR10957229_1_sub.fastq
+gzip SRR10957229_2_sub.fastq
 
 echo -e "\n`date` Done with subsampling"
