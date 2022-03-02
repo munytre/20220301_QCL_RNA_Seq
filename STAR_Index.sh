@@ -36,7 +36,7 @@ STAR \
     --runThreadN 12 \
     --genomeDir $genomedir \
     --genomeFastaFiles $ref
-    --sjdbOverhang 74 \
+    --sjdbOverhang $readlength \
     --sjdbGTFfile $gtf
 
 echo -e "\n`date` Done with indexing (STAR)"
