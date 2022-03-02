@@ -35,7 +35,7 @@ STAR \
     --runMode genomeGenerate \
     --runThreadN 12 \
     --genomeDir $genomedir \
-    --genomeFastaFiles $ref
+    --genomeFastaFiles $ref \
     --sjdbOverhang $readlength \
     --sjdbGTFfile $gtf
 
