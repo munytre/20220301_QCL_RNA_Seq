@@ -25,7 +25,8 @@ readlength="$4"
 # Set output
 genomedir="$5"
 
-# Load required tools (Detection)
+# Load required tools
+module load bioinfo-tools
 module load star/2.7.9a
 
 # Indexing
