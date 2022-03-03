@@ -24,10 +24,14 @@ dd="$2"
 ref_STAR="$3"
 
 # Load required tools (Detection)
+module load bioinfo-tools
 module load TrimGalore/0.6.1
 module load star/2.7.9a
-module load htseq/0.12.4
 module load samtools/1.14
+module load htseq/0.12.4
+#Python 3.7.2
+#CutAdapt 2.3
+#FastQC 0.11.8
 
 # Assign names for arrays
 cd "${wd}"
@@ -46,7 +50,7 @@ mkdir -p "${selected_sample}"
 echo -e "\n`date` Filtering and trimming ${selected_sample} ..."
 trim_galore --cores 8 \
 	--trim-n \
-	--fastqc --fastqc_args "--outdir $SNIC_TMP/processed/${selected_sample}/trimgalore/ -t 8" \
+	--fastqc #--fastqc_args "--outdir $SNIC_TMP/processed/${selected_sample}/trimgalore/ -t 8" \
 	--gzip \
 	--paired \
 	"${dd}/${selected_sample}_1.fastq.gz" \
