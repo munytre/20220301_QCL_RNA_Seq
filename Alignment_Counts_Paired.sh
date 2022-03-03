@@ -50,12 +50,14 @@ mkdir -p "${selected_sample}"
 echo -e "\n`date` Filtering and trimming ${selected_sample} ..."
 trim_galore --cores 8 \
 	--trim-n \
-	--fastqc #--fastqc_args "--outdir $SNIC_TMP/processed/${selected_sample}/trimgalore/ -t 8" \
+	--fastqc \
 	--gzip \
 	--paired \
 	"${dd}/${selected_sample}_1.fastq.gz" \
 	"${dd}/${selected_sample}_2.fastq.gz" \
 	-o "$SNIC_TMP/processed/${selected_sample}/trimgalore"
+
+#--fastqc_args "--outdir $SNIC_TMP/processed/${selected_sample}/trimgalore/ -t 8" \
 
 cp "$SNIC_TMP/processed/${selected_sample}/trimgalore/*" "${wd}"
 
