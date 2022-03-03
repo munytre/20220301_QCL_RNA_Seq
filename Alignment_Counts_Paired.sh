@@ -59,22 +59,25 @@ trim_galore --cores 8 \
 
 #--fastqc_args "--outdir $SNIC_TMP/processed/${selected_sample}/trimgalore/ -t 8" \
 
-cp $SNIC_TMP/processed/${selected_sample}/trimgalore/* ${wd}
+mkdir -p ${wd}/processed/${selected_sample}/trimgalore/
+cp $SNIC_TMP/processed/${selected_sample}/trimgalore/* ${wd}/processed/${selected_sample}/trimgalore/
 
 #Run STAR
-# echo -e "\n`date` Mapping ${selected_sample} with STAR"
-# STAR --genomeDir ${ref_STAR} \
-#     --runThreadN 16 \
-#     --twopassMode Basic \
-#     --readFilesIn \
-#     "$SNIC_TMP/processed/${selected_sample}/trimgalore/${selected_sample}_1_val_1.fq.gz" \
-#     "$SNIC_TMP/processed/${selected_sample}/trimgalore/${selected_sample}_2_val_2.fq.gz" \
-#     --readFilesCommand zcat \
-#     --outFileNamePrefix "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}" \
-#     --outSAMtype BAM SortedByCoordinate \
-#     --outSAMattributes All \
-#     --outReadsUnmapped Fastx \
-#     --limitBAMsortRAM 150000000000
+echo -e "\n`date` Mapping ${selected_sample} with STAR"
+STAR --genomeDir ${ref_STAR} \
+    --runThreadN 16 \
+    --twopassMode Basic \
+    --readFilesIn \
+    "$SNIC_TMP/processed/${selected_sample}/trimgalore/${selected_sample}_1_val_1.fq.gz" \
+    "$SNIC_TMP/processed/${selected_sample}/trimgalore/${selected_sample}_2_val_2.fq.gz" \
+    --readFilesCommand zcat \
+    --outFileNamePrefix "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}" \
+    --outSAMtype BAM SortedByCoordinate \
+    --outSAMattributes All \
+    --limitBAMsortRAM 64000000000
+
+mkdir -p ${wd}/processed/${selected_sample}/STAR/
+cp $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
 
 # # Index by samtools
 # echo -e "\n`date` Indexing ${selected_sample} with samtools"
