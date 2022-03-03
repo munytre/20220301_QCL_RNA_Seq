@@ -59,7 +59,7 @@ trim_galore --cores 8 \
 
 #--fastqc_args "--outdir $SNIC_TMP/processed/${selected_sample}/trimgalore/ -t 8" \
 
-cp "$SNIC_TMP/processed/${selected_sample}/trimgalore/*" "${wd}"
+cp $SNIC_TMP/processed/${selected_sample}/trimgalore/* ${wd}
 
 #Run STAR
 # echo -e "\n`date` Mapping ${selected_sample} with STAR"
