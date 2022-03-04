@@ -89,7 +89,7 @@ mkdir -p ${wd}/processed/${selected_sample}/htseq_count/
 htseq-count -n 16 \
     --order pos \
     --stranded no \
-    --counts_output "${wd}/processed/${selected_sample}/htseq_count/" \
+    --counts_output "${wd}/processed/${selected_sample}/htseq_count/${selected_sample}.count" \
     "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}Aligned.sortedByCoord.out.bam" \
     "${ref_gtf}"
 
