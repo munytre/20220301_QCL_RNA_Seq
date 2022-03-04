@@ -29,9 +29,9 @@ module load TrimGalore/0.6.1
 module load star/2.7.9a
 module load samtools/1.14
 module load htseq/0.12.4
-# Python 3.7.2
-# CutAdapt 2.3
-# FastQC 0.11.8
+#Python 3.7.2
+#CutAdapt 2.3
+#FastQC 0.11.8
 
 # Assign names for arrays
 cd "${wd}"
@@ -52,15 +52,13 @@ trim_galore --cores 8 \
 	--trim-n \
 	--fastqc \
 	--gzip \
-	--paired \
-	"${dd}/${selected_sample}_1.fastq.gz" \
-	"${dd}/${selected_sample}_2.fastq.gz" \
+	"${dd}/${selected_sample}.fastq.gz" \
 	-o "$SNIC_TMP/processed/${selected_sample}/trimgalore"
 
 #--fastqc_args "--outdir $SNIC_TMP/processed/${selected_sample}/trimgalore/ -t 8" \
 
 mkdir -p ${wd}/processed/${selected_sample}/trimgalore/
-cp $SNIC_TMP/processed/${selected_sample}/trimgalore/*.html ${wd}/processed/${selected_sample}/trimgalore/
+cp $SNIC_TMP/processed/${selected_sample}/trimgalore/* ${wd}/processed/${selected_sample}/trimgalore/
 
 #Run STAR
 echo -e "\n`date` Mapping ${selected_sample} with STAR"
@@ -68,15 +66,15 @@ STAR --genomeDir ${ref_STAR} \
     --runThreadN 16 \
     --twopassMode Basic \
     --readFilesIn \
-    "$SNIC_TMP/processed/${selected_sample}/trimgalore/${selected_sample}_1_val_1.fq.gz" \
-    "$SNIC_TMP/processed/${selected_sample}/trimgalore/${selected_sample}_2_val_2.fq.gz" \
+    "$SNIC_TMP/processed/${selected_sample}/trimgalore/${selected_sample}_val.fq.gz" \
     --readFilesCommand zcat \
     --outFileNamePrefix "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}" \
     --outSAMtype BAM SortedByCoordinate \
-    --outSAMattributes All
+    --outSAMattributes All \
+    --limitBAMsortRAM 64000000000
 
 mkdir -p ${wd}/processed/${selected_sample}/STAR/
-cp -R $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
+cp $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
 
 # # Index by samtools
 # echo -e "\n`date` Indexing ${selected_sample} with samtools"
