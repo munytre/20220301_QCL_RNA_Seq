@@ -54,8 +54,8 @@ trim_galore --cores 8 \
 	--fastqc \
 	--gzip \
 	--paired \
-	"${dd}/${selected_sample}_1.fastq.gz" \
-	"${dd}/${selected_sample}_2.fastq.gz" \
+	"${dd}/${selected_sample}/${selected_sample}_1.fastq.gz" \
+	"${dd}/${selected_sample}/${selected_sample}_2.fastq.gz" \
 	-o "$SNIC_TMP/processed/${selected_sample}/trimgalore"
 
 #--fastqc_args "--outdir $SNIC_TMP/processed/${selected_sample}/trimgalore/ -t 8" \
