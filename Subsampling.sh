@@ -17,6 +17,7 @@ wd="$1"
 cd "${wd}"
 
 # Load required tools (Detection)
+module load bioinfo-tools
 module load seqtk/1.2-r101
 
 # Unzipping
