@@ -6,7 +6,7 @@
 #SBATCH --mem 64G
 #SBATCH -t 72:00:00
 #SBATCH -J alignment_counts
-#SBATCH --array=1-1%1               # eg 1-56%10 (job 1 to 56, with 10 at a time)
+#SBATCH --array=1-14%7               # eg 1-56%10 (job 1 to 56, with 10 at a time)
 
 # Change these settings for different runs! Change SBATCH --array to the number
 # of samples you have
@@ -80,8 +80,8 @@ STAR --genomeDir ${ref_STAR} \
 echo -e "\n`date` Indexing ${selected_sample} with samtools"
 samtools index -@ 16 "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}Aligned.sortedByCoord.out.bam"
 
-mkdir -p ${wd}/processed/${selected_sample}/STAR/
-cp -R $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
+# mkdir -p ${wd}/processed/${selected_sample}/STAR/
+# cp -R $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
 
 # Counting by htseq-count
 echo -e "\n`date` Counting raw expression values of ${selected_sample} with htseq-count"
