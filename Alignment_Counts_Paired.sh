@@ -73,7 +73,8 @@ STAR --genomeDir ${ref_STAR} \
     --readFilesCommand zcat \
     --outFileNamePrefix "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}" \
     --outSAMtype BAM SortedByCoordinate \
-    --outSAMattributes All
+    --outSAMattributes All \
+    --quantMode GeneCounts
 
 # Index by samtools
 echo -e "\n`date` Indexing ${selected_sample} with samtools"
