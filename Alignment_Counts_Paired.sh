@@ -22,6 +22,7 @@ dd="$2"
 
 # Set resources
 ref_STAR="$3"
+ref_gtf="$4"
 
 # Load required tools (Detection)
 module load bioinfo-tools
@@ -73,8 +74,7 @@ STAR --genomeDir ${ref_STAR} \
     --readFilesCommand zcat \
     --outFileNamePrefix "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}" \
     --outSAMtype BAM SortedByCoordinate \
-    --outSAMattributes All \
-    --quantMode GeneCounts
+    --outSAMattributes All
 
 # Index by samtools
 echo -e "\n`date` Indexing ${selected_sample} with samtools"
@@ -82,5 +82,15 @@ samtools index -@ 16 "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sam
 
 mkdir -p ${wd}/processed/${selected_sample}/STAR/
 cp -R $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
+
+# Counting by htseq-count
+echo -e "\n`date` Counting raw expression values of ${selected_sample} with htseq-count"
+mkdir -p ${wd}/processed/${selected_sample}/htseq_count/
+htseq-count -n 16 \
+    --order pos \
+    --stranded no \
+    --counts_output "${wd}/processed/${selected_sample}/htseq_count/" \
+    "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}Aligned.sortedByCoord.out.bam" \
+    "${ref_gtf}"
 
 echo -e "\n`date` Finished!"
