@@ -75,11 +75,11 @@ STAR --genomeDir ${ref_STAR} \
     --outSAMtype BAM SortedByCoordinate \
     --outSAMattributes All
 
-mkdir -p ${wd}/processed/${selected_sample}/STAR/
-cp -R $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
-
 # Index by samtools
 echo -e "\n`date` Indexing ${selected_sample} with samtools"
 samtools index -@ 16 "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}Aligned.sortedByCoord.out.bam"
+
+mkdir -p ${wd}/processed/${selected_sample}/STAR/
+cp -R $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
 
 echo -e "\n`date` Finished!"
