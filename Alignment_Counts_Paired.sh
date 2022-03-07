@@ -3,13 +3,11 @@
 #SBATCH -A snic2022-22-143
 #SBATCH -p core
 #SBATCH -n 16
-#SBATCH --mem 64G
 #SBATCH -t 72:00:00
 #SBATCH -J alignment_counts
-#SBATCH --array=1-14%5               # eg 1-56%10 (job 1 to 56, with 10 at a time)
 
 # Change these settings for different runs! Change SBATCH --array to the number
-# of samples you have
+# of samples you have in shell
 
 # Error report
 set -euo pipefail
