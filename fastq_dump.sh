@@ -9,6 +9,10 @@
 # Error report
 set -euo pipefail
 
+# Load required tools (Detection)
+module load bioinfo-tools
+module load sratools/2.10.9 
+
 # Starting time
 echo -e "\n`date` Start"
 
