@@ -72,14 +72,15 @@ STAR --genomeDir ${ref_STAR} \
     --readFilesCommand zcat \
     --outFileNamePrefix "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}" \
     --outSAMtype BAM SortedByCoordinate \
-    --outSAMattributes All
+    --outSAMattributes All \
+    --limitBAMsortRAM 100000000000
 
 # Index by samtools
 echo -e "\n`date` Indexing ${selected_sample} with samtools"
 samtools index -@ 16 "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}Aligned.sortedByCoord.out.bam"
 
-# mkdir -p ${wd}/processed/${selected_sample}/STAR/
-# cp -R $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
+mkdir -p ${wd}/processed/${selected_sample}/STAR/
+cp -R $SNIC_TMP/processed/${selected_sample}/STAR/* ${wd}/processed/${selected_sample}/STAR
 
 # Counting by htseq-count
 echo -e "\n`date` Counting raw expression values of ${selected_sample} with htseq-count"
