@@ -48,8 +48,8 @@ echo -e "\n`date` Downloading ${selected_sample} with wget"
 cd "$SNIC_TMP/data/"
 mkdir -p ${selected_sample}
 cd ${selected_sample}
-wget "${ftp_link}${selected_sample}/${selected_sample}_1.fastq.gz"
-wget "${ftp_link}${selected_sample}/${selected_sample}_2.fastq.gz"
+wget -nv "${ftp_link}${selected_sample}/${selected_sample}_1.fastq.gz"
+wget -nv "${ftp_link}${selected_sample}/${selected_sample}_2.fastq.gz"
 
 # Create processed dir with underlying dirs for sample
 cd "$SNIC_TMP/processed/"
