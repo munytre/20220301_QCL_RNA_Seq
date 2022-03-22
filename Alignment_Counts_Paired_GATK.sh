@@ -48,8 +48,8 @@ echo -e "\n`date` Downloading ${selected_sample} with wget"
 cd "$SNIC_TMP/data/"
 mkdir -p ${selected_sample}
 cd ${selected_sample}
-wget -nv "${ftp_link}${selected_sample}/${selected_sample}_1.fastq.gz"
-wget -nv "${ftp_link}${selected_sample}/${selected_sample}_2.fastq.gz"
+curl "${ftp_link}${selected_sample}/${selected_sample}_1.fastq.gz" -o ${selected_sample}_1.fastq.gz
+curl "${ftp_link}${selected_sample}/${selected_sample}_2.fastq.gz" -o ${selected_sample}_2.fastq.gz
 
 # Create processed dir with underlying dirs for sample
 cd "$SNIC_TMP/processed/"
@@ -107,29 +107,10 @@ htseq-count -n 16 \
 
 ### GATK - RNAseq version ###
 cd $SNIC_TMP/processed/${selected_sample}/STAR
-# Remove duplicated reads
-echo -e "\n`date` Removing duplicated reads from ${selected_sample} with MarkDuplicates"
-java -Xmx96G -jar $PICARD_ROOT/picard.jar MarkDuplicates I=${selected_sample}Aligned.sortedByCoord.out.bam \
-    O=${selected_sample}RemovedDups.bam \
-    M=${selected_sample}RemovedDups.txt \
-    REMOVE_DUPLICATES=TRUE
-
-# Sort BAM after MarkDuplicates
-echo -e "\n`date` Sorting ${selected_sample} after removal of duplicated reads with SortSam"
-java -Xmx96G -jar $PICARD_ROOT/picard.jar SortSam I=${selected_sample}RemovedDups.bam \
-    O=${selected_sample}RemovedDups_sorted.bam \
-    SORT_ORDER=coordinate \
-    CREATE_INDEX=TRUE
-
-# Split reads on junctions (as described in best practices GATK - RNAseq)
-echo -e "\n`date` Split reads on junctions for ${selected_sample} with SplitNCigarReads"
-gatk --java-options "-Xmx96G" SplitNCigarReads -R ${ref_gen} \
-    -I ${selected_sample}RemovedDups_sorted.bam \
-    -O ${selected_sample}RemovedDups_sorted_split.bam
 
 # Add read groups for HaplotypeCaller
 echo -e "\n`date` Adding read groups for ${selected_sample} with AddOrReplaceReadGroups"
-java -Xmx96G -jar $PICARD_ROOT/picard.jar AddOrReplaceReadGroups I=${selected_sample}RemovedDups_sorted_split.bam \
+java -Xmx96G -XX:ParallelGCThreads=16 -jar $PICARD_ROOT/picard.jar AddOrReplaceReadGroups I=${selected_sample}Aligned.sortedByCoord.out.bam \
     O=${selected_sample}RGs.bam \
     RGID=1 \
     RGLB=lib1 \
@@ -137,30 +118,54 @@ java -Xmx96G -jar $PICARD_ROOT/picard.jar AddOrReplaceReadGroups I=${selected_sa
     RGPU=unit1 \
     RGSM=20
 
+# Index after adding read groups
+echo -e "\n`date` Re-index ${selected_sample} with samtools"
+samtools index -@ 16 ${selected_sample}RGs.bam
+
+# Remove duplicated reads
+echo -e "\n`date` Removing duplicated reads from ${selected_sample} with MarkDuplicates"
+java -Xmx96G -XX:ParallelGCThreads=16 -jar $PICARD_ROOT/picard.jar MarkDuplicates I=${selected_sample}RGs.bam \
+    O=${selected_sample}RemovedDups.bam \
+    M=${selected_sample}RemovedDups.txt \
+    REMOVE_DUPLICATES=TRUE
+
+# Sort BAM after MarkDuplicates
+echo -e "\n`date` Sorting ${selected_sample} after removal of duplicated reads with SortSam"
+java -Xmx96G -XX:ParallelGCThreads=16 -jar $PICARD_ROOT/picard.jar SortSam I=${selected_sample}RemovedDups.bam \
+    O=${selected_sample}RemovedDups_sorted.bam \
+    SORT_ORDER=coordinate \
+    CREATE_INDEX=TRUE
+
+# Split reads on junctions (as described in best practices GATK - RNAseq)
+echo -e "\n`date` Split reads on junctions for ${selected_sample} with SplitNCigarReads"
+gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" SplitNCigarReads -R ${ref_gen} \
+    -I ${selected_sample}RemovedDups_sorted.bam \
+    -O ${selected_sample}RemovedDups_sorted_split.bam
+
 # Generate table for QC Score recalculation
 echo -e "\n`date` Generate table for QC Score recalculation for ${selected_sample} with BaseRecalibrator"
-gatk --java-options "-Xmx96G" BaseRecalibrator -I ${selected_sample}RGs.bam \
+gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" BaseRecalibrator -I ${selected_sample}RemovedDups_sorted_split.bam \
     -R ${ref_gen} \
     --known-sites /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
     -O ${selected_sample}_BQSR.table
 
 # Recalculate QC Scores for all reads with BQSR
 echo -e "\n`date` Recalculating QC Scored for ${selected_sample} with ApplyBQSR"
-gatk --java-options "-Xmx96G" ApplyBQSR -R ${ref_gen} \
-    -I ${selected_sample}RGs.bam \
+gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" ApplyBQSR -R ${ref_gen} \
+    -I ${selected_sample}RemovedDups_sorted_split.bam \
     --bqsr-recal-file ${selected_sample}_BQSR.table \
     -O ${selected_sample}BQSR.bam
 
 # Generate BQSR QC plots
 echo -e "\n`date` Generate BQSR plots for ${selected_sample} with AnalyzeCovariates"
-gatk --java-options "-Xmx96G" AnalyzeCovariates -bqsr ${selected_sample}_BQSR.table \
+gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" AnalyzeCovariates -bqsr ${selected_sample}_BQSR.table \
     -plots ${selected_sample}.pdf
 
 # Generate VCFs
 echo -e "\n`date` Generate VCF for ${selected_sample} with HaplotypeCaller"
-gatk --java-options "-Xmx96G" HaplotypeCaller -R ${ref_gen} \
+gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" HaplotypeCaller -R ${ref_gen} \
     -I ${selected_sample}BQSR.bam \
-    -O ${selected_sample}_19_44500000-45000000_.vcf.gz \
+    -O ${selected_sample}_19_44500000_45000000_.vcf.gz \
     --native-pair-hmm-threads 16 \
     --dbsnp /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
     -L chr19:44500000-45000000
