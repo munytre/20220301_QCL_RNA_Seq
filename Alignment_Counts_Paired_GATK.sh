@@ -168,7 +168,7 @@ gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" HaplotypeCaller -R ${ref_
     -O ${selected_sample}_19_44500000_45000000_.vcf.gz \
     --native-pair-hmm-threads 16 \
     --dbsnp /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
-    -L chr19:44500000-45000000
+    -L 19:44500000-45000000
 
 # Copy relevant files from GATK pipeline
 echo -e "\n`date` Copying VCF and BQRS plots for ${selected_sample} to wd"
