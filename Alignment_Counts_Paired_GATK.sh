@@ -160,9 +160,10 @@ gatk --java-options "-Xmx96G" AnalyzeCovariates -bqsr ${selected_sample}_BQSR.ta
 echo -e "\n`date` Generate VCF for ${selected_sample} with HaplotypeCaller"
 gatk --java-options "-Xmx96G" HaplotypeCaller -R ${ref_gen} \
     -I ${selected_sample}BQSR.bam \
-    -O ${selected_sample}.vcf.gz \
+    -O ${selected_sample}_19_44500000-45000000_.vcf.gz \
     --native-pair-hmm-threads 16 \
-    --dbsnp /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz
+    --dbsnp /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
+    -L chr19:44500000-45000000
 
 # Copy relevant files from GATK pipeline
 echo -e "\n`date` Copying VCF and BQRS plots for ${selected_sample} to wd"
