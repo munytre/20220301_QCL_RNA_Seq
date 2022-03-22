@@ -24,8 +24,8 @@ module load sratools/2.10.9
 module load cellranger/6.1.2
 
 # Download
-echo -e "\n`date` Start download"
-sam-dump SRR13782529.sra | samtools view -bS - > SRR13782529.bam
+# echo -e "\n`date` Start download"
+# sam-dump SRR13782529.sra | samtools view -bS - > SRR13782529.bam
 
 # Convert to fastq
 echo -e "\n`date` Start conversion to fastq"
