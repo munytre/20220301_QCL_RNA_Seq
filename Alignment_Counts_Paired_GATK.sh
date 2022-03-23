@@ -156,16 +156,23 @@ gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" ApplyBQSR -R ${ref_gen} \
     --bqsr-recal-file ${selected_sample}_BQSR.table \
     -O ${selected_sample}BQSR.bam
 
+echo -e "\n`date` Generate 2nd table for QC Score recalculation for ${selected_sample} with BaseRecalibrator"
+gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" BaseRecalibrator -I ${selected_sample}BQSR.bam \
+    -R ${ref_gen} \
+    --known-sites /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
+    -O ${selected_sample}_BQSR2.table
+
 # Generate BQSR QC plots
 echo -e "\n`date` Generate BQSR plots for ${selected_sample} with AnalyzeCovariates"
-gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" AnalyzeCovariates -bqsr ${selected_sample}_BQSR.table \
+gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" AnalyzeCovariates -before ${selected_sample}_BQSR.table \
+    -after ${selected_sample}_BQSR2.table \
     -plots ${selected_sample}.pdf
 
 # Generate VCFs
 echo -e "\n`date` Generate VCF for ${selected_sample} with HaplotypeCaller"
 gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" HaplotypeCaller -R ${ref_gen} \
     -I ${selected_sample}BQSR.bam \
-    -O ${selected_sample}_19_44500000_45000000_.vcf.gz \
+    -O ${selected_sample}_19_44500000_45000000.vcf.gz \
     --native-pair-hmm-threads 16 \
     --dbsnp /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
     -L 19:44500000-45000000
