@@ -44,7 +44,7 @@ ftp_link=${links[$((SLURM_ARRAY_TASK_ID-1))]}
 mkdir -p $SNIC_TMP/{processed,data}
 
 # Download data
-echo -e "\n`date` Downloading ${selected_sample} with wget"
+echo -e "\n`date` Downloading ${selected_sample} with cURL"
 cd "$SNIC_TMP/data/"
 mkdir -p ${selected_sample}
 cd ${selected_sample}
