@@ -58,7 +58,7 @@ echo -e "Selected sample numbers: ${sample_number_1}, ${sample_number_2}, ${samp
 mkdir -p $SNIC_TMP/{processed,data}
 
 # Start acquiring files
-echo -e "\n`date` Downloading ${selected_sample} with prefetch"
+echo -e "\n`date` Downloading ${experiment} with prefetch"
 cd "$SNIC_TMP/data/"
 mkdir -p ${experiment}
 cd ${experiment}
