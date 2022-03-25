@@ -77,19 +77,19 @@ rm -r $selected_sample_3
 
 # Rename fastqs to Cellranger-compatible files
 # For lane 2
-mv "${selected_sample_1}_1.fastq.gz" "${selected_sample_1}_${experiment}_${sample_number_1}_R1_001.fastq.gz"
-mv "${selected_sample_1}_2.fastq.gz" "${selected_sample_1}_${experiment}_${sample_number_1}_R2_001.fastq.gz"
-mv "${selected_sample_1}_3.fastq.gz" "${selected_sample_1}_${experiment}_${sample_number_1}_I1_001.fastq.gz"
+mv "${selected_sample_1}_1.fastq.gz" "${experiment}_${sample_number_1}_R1_001.fastq.gz"
+mv "${selected_sample_1}_2.fastq.gz" "${experiment}_${sample_number_1}_R2_001.fastq.gz"
+mv "${selected_sample_1}_3.fastq.gz" "${experiment}_${sample_number_1}_I1_001.fastq.gz"
 
 # For lane 2
-mv "${selected_sample_2}_1.fastq.gz" "${selected_sample_2}_${experiment}_${sample_number_2}_R1_001.fastq.gz"
-mv "${selected_sample_2}_2.fastq.gz" "${selected_sample_2}_${experiment}_${sample_number_2}_R2_001.fastq.gz"
-mv "${selected_sample_2}_3.fastq.gz" "${selected_sample_2}_${experiment}_${sample_number_2}_I1_001.fastq.gz"
+mv "${selected_sample_2}_1.fastq.gz" "${experiment}_${sample_number_2}_R1_001.fastq.gz"
+mv "${selected_sample_2}_2.fastq.gz" "${experiment}_${sample_number_2}_R2_001.fastq.gz"
+mv "${selected_sample_2}_3.fastq.gz" "${experiment}_${sample_number_2}_I1_001.fastq.gz"
 
 # For lane 2
-mv "${selected_sample_3}_1.fastq.gz" "${selected_sample_3}_${experiment}_${sample_number_3}_R1_001.fastq.gz"
-mv "${selected_sample_3}_2.fastq.gz" "${selected_sample_3}_${experiment}_${sample_number_3}_R2_001.fastq.gz"
-mv "${selected_sample_3}_3.fastq.gz" "${selected_sample_3}_${experiment}_${sample_number_3}_I1_001.fastq.gz"
+mv "${selected_sample_3}_1.fastq.gz" "${experiment}_${sample_number_3}_R1_001.fastq.gz"
+mv "${selected_sample_3}_2.fastq.gz" "${experiment}_${sample_number_3}_R2_001.fastq.gz"
+mv "${selected_sample_3}_3.fastq.gz" "${experiment}_${sample_number_3}_I1_001.fastq.gz"
 
 cp *001.fastq.gz ${wd}
 

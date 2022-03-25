@@ -2,7 +2,7 @@
  
 #SBATCH -A snic2022-22-143
 #SBATCH -p core
-#SBATCH -n 6
+#SBATCH -n 16
 #SBATCH -t 72:00:00
 #SBATCH -J 10X_gen
 
