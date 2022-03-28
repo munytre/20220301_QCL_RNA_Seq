@@ -21,9 +21,8 @@ wd="$1"
 # Load required tools
 echo -e "\n`date` Load modules"
 module load bioinfo-tools
-# module load samtools/1.14
 module load sratools/2.10.9
-# module load cellranger/6.1.2
+module load cellranger/6.1.2
 
 # Assign names for arrays
 cd "${wd}"
@@ -91,6 +90,22 @@ mv "${selected_sample_3}_1.fastq.gz" "${experiment}_${sample_number_3}_R1_001.fa
 mv "${selected_sample_3}_2.fastq.gz" "${experiment}_${sample_number_3}_R2_001.fastq.gz"
 mv "${selected_sample_3}_3.fastq.gz" "${experiment}_${sample_number_3}_I1_001.fastq.gz"
 
-cp *001.fastq.gz ${wd}
+# cd to processed directory
+cd "$SNIC_TMP/processed/"
+
+# Start counting
+cellranger count --id=${experiment} \
+    --fastqs="$SNIC_TMP/data/${experiment}" \
+    --transcriptome=/proj/apoe4_als/RESOURCES/Mus_musculus.GRCm39/CellRanger/Mus \
+    --no-bam \
+    --localcores=16 \
+    --localmem=96
+
+# Copy output to wd
+cp -r $SNIC_TMP/processed/${experiment}/outs ${wd}
+
+# List all used modules in run
+echo -e "\n`date` SessionInfo"
+module list
 
 echo -e "\n`date` Done with download"
