@@ -21,9 +21,9 @@ wd="$1"
 # Load required tools
 echo -e "\n`date` Load modules"
 module load bioinfo-tools
-# module load samtools/1.14
+module load samtools/1.14
 module load sratools/2.10.9
-# module load cellranger/6.1.2
+module load cellranger/6.1.2
 
 # Assign names for arrays
 cd "${wd}"
