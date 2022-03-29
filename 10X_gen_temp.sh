@@ -70,7 +70,7 @@ cd "$SNIC_TMP/processed/"
 
 cellranger count --id=${experiment} \
     --fastqs="$SNIC_TMP/data/${experiment}" \
-    --transcriptome=/proj/apoe4_als/RESOURCES/Mus_musculus.GRCm39/CellRanger/Mus10Xfiltered \
+    --transcriptome=/proj/apoe4_als/RESOURCES/Mus_musculus.GRCm39/CellRanger/Mus \
     --no-bam \
     --localcores=16 \
     --localmem=96
