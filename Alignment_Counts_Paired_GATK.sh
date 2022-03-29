@@ -177,6 +177,17 @@ gatk --java-options "-Xmx96G -XX:ParallelGCThreads=16" HaplotypeCaller -R ${ref_
     --dbsnp /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
     -L 19:44500000-45000000
 
+# Filtering VCF (According to best practices GATK for RNAseq)
+echo -e "\n`date` Filtering VCF for ${selected_sample} with VariantFiltration"
+gatk VariantFiltration \
+    -R ${ref_gen} \
+    -V ${selected_sample}_19_44500000_45000000.vcf.gz \
+    -O ${selected_sample}_19_44500000_45000000_filtered.vcf.gz \
+    --filter-name "FS" \
+	--filter "FS > 30.0" \
+	--filter-name "QD" \
+	--filter "QD < 2.0"
+
 # Copy relevant files from GATK pipeline
 echo -e "\n`date` Copying VCF and BQRS plots for ${selected_sample} to wd"
 mkdir -p ${wd}/processed/${selected_sample}/GATK
