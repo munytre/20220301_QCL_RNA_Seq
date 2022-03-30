@@ -2,7 +2,7 @@
  
 #SBATCH -A snic2022-22-143
 #SBATCH -p core
-#SBATCH -n 6
+#SBATCH -n 16
 #SBATCH -t 72:00:00
 #SBATCH -J 10X_gen
 
@@ -16,11 +16,12 @@ set -euo pipefail
 wd="$1"
 
 # Set resources
-# ref_Cellranger="$2"
+ref_Cellranger="$2"
 
 # Load required tools
 echo -e "\n`date` Load modules"
 module load bioinfo-tools
+module load samtools/1.14
 module load sratools/2.10.9
 module load cellranger/6.1.2
 
@@ -96,13 +97,14 @@ cd "$SNIC_TMP/processed/"
 # Start counting
 cellranger count --id=${experiment} \
     --fastqs="$SNIC_TMP/data/${experiment}" \
-    --transcriptome=/proj/apoe4_als/RESOURCES/Mus_musculus.GRCm39/CellRanger/Mus \
+    --transcriptome=${ref_Cellranger} \
     --no-bam \
     --localcores=16 \
     --localmem=96
 
 # Copy output to wd
-cp -r $SNIC_TMP/processed/${experiment}/outs ${wd}
+mkdir -p ${wd}/${experiment}
+cp -r $SNIC_TMP/processed/${experiment}/outs ${wd}/${experiment}
 
 # List all used modules in run
 echo -e "\n`date` SessionInfo"
