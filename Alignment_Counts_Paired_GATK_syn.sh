@@ -118,32 +118,23 @@ htseq-count -n 16 \
 ### GATK - RNAseq version ###
 cd $SNIC_TMP/processed/${selected_sample}/STAR
 
-# -------------
-# # Add read groups for HaplotypeCaller
-# echo -e "\n`date` Adding read groups for ${selected_sample} with AddOrReplaceReadGroups"
-# java -Xmx96G -XX:ParallelGCThreads=16 -jar $PICARD_ROOT/picard.jar AddOrReplaceReadGroups I=${selected_sample}Aligned.sortedByCoord.out.bam \
-#     O=${selected_sample}RGs.bam \
-#     RGID=1 \
-#     RGLB=lib1 \
-#     RGPL=illumina \
-#     RGPU=unit1 \
-#     RGSM=20
+# Add read groups for HaplotypeCaller
+echo -e "\n`date` Adding read groups for ${selected_sample} with AddOrReplaceReadGroups"
+java -Xmx96G -XX:ParallelGCThreads=16 -jar $PICARD_ROOT/picard.jar AddOrReplaceReadGroups I=${selected_sample}Aligned.sortedByCoord.out.bam \
+    O=${selected_sample}RGs.bam \
+    RGID=1 \
+    RGLB=lib1 \
+    RGPL=illumina \
+    RGPU=unit1 \
+    RGSM=20
 
-# # Index after adding read groups
-# echo -e "\n`date` Re-index ${selected_sample} with samtools"
-# samtools index -@ 16 ${selected_sample}RGs.bam
-
-# # Remove duplicated reads
-# echo -e "\n`date` Removing duplicated reads from ${selected_sample} with MarkDuplicates"
-# java -Xmx96G -XX:ParallelGCThreads=16 -jar $PICARD_ROOT/picard.jar MarkDuplicates I=${selected_sample}RGs.bam \
-#     O=${selected_sample}RemovedDups.bam \
-#     M=${selected_sample}RemovedDups.txt \
-#     REMOVE_DUPLICATES=TRUE
-# --------------
+# Index after adding read groups
+echo -e "\n`date` Re-index ${selected_sample} with samtools"
+samtools index -@ 16 ${selected_sample}RGs.bam
 
 # Remove duplicated reads
 echo -e "\n`date` Removing duplicated reads from ${selected_sample} with MarkDuplicates"
-java -Xmx96G -XX:ParallelGCThreads=16 -jar $PICARD_ROOT/picard.jar MarkDuplicates I=${selected_sample}Aligned.sortedByCoord.out.bam \
+java -Xmx96G -XX:ParallelGCThreads=16 -jar $PICARD_ROOT/picard.jar MarkDuplicates I=${selected_sample}RGs.bam \
     O=${selected_sample}RemovedDups.bam \
     M=${selected_sample}RemovedDups.txt \
     REMOVE_DUPLICATES=TRUE
