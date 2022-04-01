@@ -39,7 +39,7 @@ module load synapseclient/2.3.1
 
 # Assign names for arrays
 cd "${wd}"
-names=($(cat jobs))
+names=($(cat jobs_nounderscore))
 selected_sample=${names[$((SLURM_ARRAY_TASK_ID-1))]}
 echo -e "Selected sample: ${selected_sample}"
 links1=($(cat syn_links1.txt))
@@ -58,8 +58,8 @@ cd ${selected_sample}
 synapse login --rememberMe -u ${synapse_user} -p ${synapse_api}
 synapse get ${syn_link1}
 synapse get ${syn_link2}
-mv ${selected_sample}_*_R1_001.fastq.gz ${selected_sample}_1.fastq.gz
-mv ${selected_sample}_*_R2_001.fastq.gz ${selected_sample}_2.fastq.gz
+mv ${selected_sample}.r1.fastq.gz ${selected_sample}_1.fastq.gz
+mv ${selected_sample}.r2.fastq.gz ${selected_sample}_2.fastq.gz
 
 # Create processed dir with underlying dirs for sample
 cd "$SNIC_TMP/processed/"
