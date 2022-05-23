@@ -24,6 +24,9 @@ ref_gen="$4"
 synapse_user="$5"
 synapse_api="$6"
 
+# Downsampling percentage
+downsampling_p="$7"
+
 # Load required tools
 echo -e "\n`date` Load modules"
 module load bioinfo-tools
@@ -58,8 +61,8 @@ cd ${selected_sample}
 synapse login --rememberMe -u ${synapse_user} -p ${synapse_api}
 synapse get ${syn_link1}
 synapse get ${syn_link2}
-mv ${selected_sample}*R1*.fastq.gz ${selected_sample}_1.fastq.gz
-mv ${selected_sample}*R2*.fastq.gz ${selected_sample}_2.fastq.gz
+mv ${selected_sample}.r1.fastq.gz ${selected_sample}_1.fastq.gz
+mv ${selected_sample}.r2.fastq.gz ${selected_sample}_2.fastq.gz
 
 # Create processed dir with underlying dirs for sample
 cd "$SNIC_TMP/processed/"
@@ -105,6 +108,16 @@ echo -e "\n`date` Copying log files for ${selected_sample}"
 mkdir -p ${wd}/processed/${selected_sample}/STAR
 cp -R $SNIC_TMP/processed/${selected_sample}/STAR/*.out ${wd}/processed/${selected_sample}/STAR
 
+# Counting by htseq-count
+echo -e "\n`date` Counting raw expression values of ${selected_sample} with htseq-count"
+mkdir -p ${wd}/processed/${selected_sample}/htseq_count/
+htseq-count -n 12 \
+    --order pos \
+    --stranded reverse \
+    --counts_output "${wd}/processed/${selected_sample}/htseq_count/${selected_sample}.count" \
+    "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}Aligned.sortedByCoord.out.bam" \
+    "${ref_gtf}"
+
 ### GATK - RNAseq version ###
 cd $SNIC_TMP/processed/${selected_sample}/STAR
 
@@ -136,17 +149,78 @@ java -Xmx70G -XX:ParallelGCThreads=12 -jar $PICARD_ROOT/picard.jar SortSam I=${s
     SORT_ORDER=coordinate \
     CREATE_INDEX=TRUE
 
+# Downsample BAM for coverage analysis
+java -Xmx70G -XX:ParallelGCThreads=12 -jar $PICARD_ROOT/picard.jar DownsampleSam I=${selected_sample}RemovedDups_sorted.bam \
+    O=${selected_sample}DownSampled.bam \
+    P=${downsampling_p} \
+    R=747 \
+    CREATE_INDEX=true
+
 # Acquiring coverage with samtools mpileup
 echo -e "\n`date` Acquiring coverage for APOE in ${selected_sample} with samtools mpileup"
-samtools mpileup ${selected_sample}RemovedDups_sorted.bam \
+samtools mpileup ${selected_sample}DownSampled.bam \
     -f ${ref_gen} \
     -r 19:44905791-44909393 \
     -o ${selected_sample}_mpileup.txt
 
+# Split reads on junctions (as described in best practices GATK - RNAseq)
+echo -e "\n`date` Split reads on junctions for ${selected_sample} with SplitNCigarReads"
+gatk --java-options "-Xmx70G -XX:ParallelGCThreads=12" SplitNCigarReads -R ${ref_gen} \
+    -I ${selected_sample}DownSampled.bam \
+    -O ${selected_sample}DownSampled_split.bam
+
+# Generate table for QC Score recalculation
+echo -e "\n`date` Generate table for QC Score recalculation for ${selected_sample} with BaseRecalibrator"
+gatk --java-options "-Xmx70G -XX:ParallelGCThreads=12" BaseRecalibrator -I ${selected_sample}DownSampled_split.bam \
+    -R ${ref_gen} \
+    --known-sites /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
+    -O ${selected_sample}_BQSR.table
+
+# Recalculate QC Scores for all reads with BQSR
+echo -e "\n`date` Recalculating QC Scored for ${selected_sample} with ApplyBQSR"
+gatk --java-options "-Xmx70G -XX:ParallelGCThreads=12" ApplyBQSR -R ${ref_gen} \
+    -I ${selected_sample}DownSampled_split.bam \
+    --bqsr-recal-file ${selected_sample}_BQSR.table \
+    -O ${selected_sample}BQSR.bam
+
+echo -e "\n`date` Generate 2nd table for QC Score recalculation for ${selected_sample} with BaseRecalibrator"
+gatk --java-options "-Xmx70G -XX:ParallelGCThreads=12" BaseRecalibrator -I ${selected_sample}BQSR.bam \
+    -R ${ref_gen} \
+    --known-sites /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
+    -O ${selected_sample}_BQSR2.table
+
+# Generate BQSR QC plots
+echo -e "\n`date` Generate BQSR plots for ${selected_sample} with AnalyzeCovariates"
+gatk --java-options "-Xmx70G -XX:ParallelGCThreads=12" AnalyzeCovariates -before ${selected_sample}_BQSR.table \
+    -after ${selected_sample}_BQSR2.table \
+    -plots ${selected_sample}.pdf
+
+# Generate VCFs
+echo -e "\n`date` Generate VCF for ${selected_sample} with HaplotypeCaller"
+gatk --java-options "-Xmx70G -XX:ParallelGCThreads=12" HaplotypeCaller -R ${ref_gen} \
+    -I ${selected_sample}BQSR.bam \
+    -O ${selected_sample}_19_44500000_45000000.vcf.gz \
+    --native-pair-hmm-threads 12 \
+    --dbsnp /home/munytre/RESOURCES/Homo_sapiens.GRCh38/VCF/dbsnp_146_non_chr.hg38.vcf.gz \
+    -L 19:44500000-45000000
+
+# Filtering VCF (According to best practices GATK for RNAseq)
+echo -e "\n`date` Filtering VCF for ${selected_sample} with VariantFiltration"
+gatk VariantFiltration \
+    -R ${ref_gen} \
+    -V ${selected_sample}_19_44500000_45000000.vcf.gz \
+    -O ${selected_sample}_19_44500000_45000000_filtered.vcf.gz \
+    --filter-name "FS" \
+	--filter "FS > 30.0" \
+	--filter-name "QD" \
+	--filter "QD < 2.0"
+
 # Copy relevant files from GATK pipeline
-echo -e "\n`date` Copying pileup output for ${selected_sample} to wd"
-mkdir -p ${wd}/processed/${selected_sample}/samtools
-cp $SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}_mpileup.txt ${wd}/processed/${selected_sample}/samtools
+echo -e "\n`date` Copying VCF and BQRS plots for ${selected_sample} to wd"
+mkdir -p ${wd}/processed/${selected_sample}/GATK
+cp $SNIC_TMP/processed/${selected_sample}/STAR/*.txt ${wd}/processed/${selected_sample}/GATK
+cp $SNIC_TMP/processed/${selected_sample}/STAR/*.pdf ${wd}/processed/${selected_sample}/GATK
+cp $SNIC_TMP/processed/${selected_sample}/STAR/*.vcf* ${wd}/processed/${selected_sample}/GATK
 
 # List all used modules in run
 echo -e "\n`date` SessionInfo"
