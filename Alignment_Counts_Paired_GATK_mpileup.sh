@@ -95,16 +95,6 @@ echo -e "\n`date` Copying log files for ${selected_sample}"
 mkdir -p ${wd}/processed/${selected_sample}/STAR
 cp -R $SNIC_TMP/processed/${selected_sample}/STAR/*.out ${wd}/processed/${selected_sample}/STAR
 
-# Counting by htseq-count
-echo -e "\n`date` Counting raw expression values of ${selected_sample} with htseq-count"
-mkdir -p ${wd}/processed/${selected_sample}/htseq_count/
-htseq-count -n 12 \
-    --order pos \
-    --stranded reverse \
-    --counts_output "${wd}/processed/${selected_sample}/htseq_count/${selected_sample}.count" \
-    "$SNIC_TMP/processed/${selected_sample}/STAR/${selected_sample}Aligned.sortedByCoord.out.bam" \
-    "${ref_gtf}"
-
 ### GATK - RNAseq version ###
 cd $SNIC_TMP/processed/${selected_sample}/STAR
 
