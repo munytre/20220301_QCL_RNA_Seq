@@ -121,7 +121,7 @@ java -Xmx70G -XX:ParallelGCThreads=12 -jar $PICARD_ROOT/picard.jar MarkDuplicate
 
 # Sort BAM after MarkDuplicates
 echo -e "\n`date` Sorting ${selected_sample} after removal of duplicated reads with SortSam"
-java -Xm70G -XX:ParallelGCThreads=12 -jar $PICARD_ROOT/picard.jar SortSam I=${selected_sample}RemovedDups.bam \
+java -Xmx70G -XX:ParallelGCThreads=12 -jar $PICARD_ROOT/picard.jar SortSam I=${selected_sample}RemovedDups.bam \
     O=${selected_sample}RemovedDups_sorted.bam \
     SORT_ORDER=coordinate \
     CREATE_INDEX=TRUE
