@@ -11,4 +11,4 @@ The bash folder has a secondary folder structure consisting of <i>single_cell</i
 
 ## Contact
 For questions don't hesitate to send me a message at:
-q.c.lin@students.uu.nl
+q.c.lin-3@umcutrecht.nl
